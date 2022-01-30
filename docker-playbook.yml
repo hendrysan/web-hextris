@@ -1,0 +1,37 @@
+- hosts: server
+  vars:
+          image: hendrysan/web-hextris
+  tasks:
+    - name: install python-docker di ubuntu
+      apt:
+        name: "{{ item }}"
+        state: latest
+      loop:
+        - python3
+        - python3-docker
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: install python-docker di centos
+      yum:
+        name: "{{ item }}"
+        state: latest
+      loop:
+        - python3
+        - python3-docker
+      when: ansible_facts['os_family'] == "RedHat"
+
+    - name: Pull image dari dockerhub
+      docker_image:
+        name: "{{ image }}"
+        state: present
+        force: yes
+
+    - name: Run Container
+      docker_container:
+        name: docker-hextris
+        image: "{{ image }}"
+        state: started
+        published_ports:
+          - 10001:80
+        recreate: yes
+
